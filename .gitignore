@@ -1,0 +1,21 @@
+# Node / Astro (once the site scaffold lands)
+node_modules/
+dist/
+.astro/
+.output/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
