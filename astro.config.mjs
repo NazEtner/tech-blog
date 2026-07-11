@@ -1,9 +1,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// TODO: replace with the real custom domain once it's decided (needed for
-// correct absolute URLs in the sitemap and RSS feeds).
-const SITE_URL = 'https://example.com';
+const SITE_URL = 'https://nazet.jp';
 
 export default defineConfig({
   site: SITE_URL,

@@ -4,7 +4,9 @@
 
 記事候補は [`blogscan`](N:\repos\tools\blogscan)（別リポジトリ）が自動生成する。厳選・執筆は人間が行う。このリポジトリはサイト本体（ビルド設定・テンプレート・記事コンテンツ）を持つ。
 
-現状: **仕様のみ。サイト実装は未着手。**
+現状: サイト実装済み（2026-07-10、ビルド・主要ページ確認済み）。ドメイン決定済み。ドメイン反映・自前サーバー構築・AdSense申請等は未着手。
+
+**ドメイン: `nazet.jp`（apex）**。所有ドメインは`nazet.jp`と`nazetws.com`の2つで、apexの`ads.txt`要件のシンプルさを優先して`nazet.jp`を採用。`nazetws.com`は別プロジェクト用に温存。
 
 ---
 
@@ -22,12 +24,25 @@
 
 リクエストフロー概要：
 ```
-yourdomain.com（DNS→自前サーバー）
+nazet.jp（DNS→自前サーバー）
   / , /posts/*, /rss.xml, /ads.txt, /sitemap.xml → GitHub Pagesへプロキシ（キャッシュ）
   /api/analytics/collect → 自前サーバーのローカルサービス
   （コメントは当面giscusでサーバー内蔵不要）
 ```
 自前サーバー側はコンテンツの複製を持たない＝二重デプロイパイプラインにならない。
+
+### リバースプロキシ用LXCのリソース割り当て（2026-07-10決定）
+
+| 項目 | 割り当て | 理由 |
+|---|---|---|
+| vCPU | 1 core | 低トラフィックの個人ブログのリバースプロキシならTLS終端込みで十分 |
+| RAM | 1 GB | プロキシ単体なら256MB程度で足りるが、将来Umami等の解析やコメントAPIを同居させる前提で余裕を持たせた |
+| Disk | 16 GB | OS+Caddy/nginx+証明書+ログ用途に加え、将来sqlite/postgres（Umami/コメントDB）を見込んだ余裕 |
+| Swap | 512 MB | メモリスパイクの安全弁 |
+| ネットワーク | 80/443番ポート開放、固定IP推奨 | Let's Encrypt証明書更新とAレコード運用のため |
+| コンテナ種別 | unprivileged LXC、Debian 12 / Ubuntu 22.04ベース | 公開ポートを持つコンテナは攻撃面を狭めるためunprivileged推奨 |
+
+ホスト側の空きリソースが少ない場合はRAM 512MBまで削っても単体のリバースプロキシとしては動作する。
 
 ## 2. 静的サイトジェネレータ：Astro
 
@@ -100,9 +115,11 @@ URLスキーム：
 
 実装済み（2026-07-10）：Astroプロジェクト雛形、コンテンツコレクションのスキーマ、各種ページテンプレート（記事/カテゴリ/タグ/シリーズ/ホーム/About/プライバシー）、RSS（全体+カテゴリ別）・sitemap、ads.txtプレースホルダーとAdSlotコンポーネント、GitHub Actionsのビルド+シークレットスキャン+Pagesデプロイワークフロー。動作確認用のサンプル記事2本（日英ペア、シリーズ・タグ・コードハイライト確認用）込み。`npm run build`成功、主要ページ全種を実際にブラウザで表示確認済み。
 
+ドメイン決定済み（`nazet.jp`、`astro.config.mjs`の`SITE_URL`に反映済み）。リバースプロキシ用LXCのリソース割り当ても決定済み（1節参照）。
+
 未着手：
-- 実際のドメイン取得・確定（`astro.config.mjs`の`SITE_URL`は`https://example.com`のプレースホルダー）
-- 自前サーバー側のリバースプロキシ設定（ドメイン確定後）
+- `nazet.jp`のDNS Aレコードを実際のLXCサーバーへ向ける
+- LXCの構築（unprivileged, 1vCPU/1GB/16GB、Caddy or nginxインストール、Let's Encrypt証明書取得）とリバースプロキシ設定（GitHub Pagesへのプロキシ、`/ads.txt`の素通し）
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み
 - Plausible/Umami等のファーストパーティ解析実装
