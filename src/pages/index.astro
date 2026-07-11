@@ -2,46 +2,40 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const links = [
-  { href: '/blog/', label: 'Blog', desc: '技術ブログ。ゲームエンジン・ネットコード・レトロハードウェア・音声/MLツールなどの開発から面白かったものを書いています。' },
-  { href: '/portfolio/', label: 'Portfolio', desc: '作ってきたものの紹介（準備中）。' },
-  { href: '/about/', label: 'About', desc: 'このサイトについて。' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/portfolio/', label: 'Portfolio' },
+  { href: '/about/', label: 'About' },
 ];
 ---
 
 <BaseLayout title="なななみの倉庫">
+  <h1 class="landing-title">なななみの倉庫</h1>
   <ul class="landing-links">
     {links.map((l) => (
-      <li>
-        <a href={l.href}>
-          <h2>{l.label}</h2>
-          <p>{l.desc}</p>
-        </a>
-      </li>
+      <li><a href={l.href}>{l.label}</a></li>
     ))}
   </ul>
 </BaseLayout>
 
 <style>
+  .landing-title {
+    text-align: center;
+  }
   .landing-links {
     list-style: none;
     padding: 0;
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
   }
   .landing-links a {
     display: block;
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem 2rem;
     text-decoration: none;
-    color: inherit;
-  }
-  .landing-links h2 {
-    margin: 0 0 0.5rem 0;
     color: var(--color-accent);
-  }
-  .landing-links p {
-    margin: 0;
-    color: var(--color-muted);
+    font-size: 1.2rem;
   }
 </style>
