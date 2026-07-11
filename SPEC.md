@@ -10,39 +10,37 @@
 
 ---
 
-## 1. ホスティング構成（GitHub Pages + 自前サーバーのハイブリッド）
+## 1. ホスティング構成（GitHub Pages + Cloudflare Tunnel経由の自前LXC）
 
-役割分担の原則：**GitHub Pagesにできないことだけ自前サーバーが担う**。
+役割分担の原則：**GitHub Pagesにできないことだけ自前LXCが担う**。ポートは一切開放しない方針（自宅/自前サーバーのグローバルIP露出を避けるため）のため、GitHub Pagesへの透過プロキシは自前サーバーではなく **Cloudflareの通常DNS/CDN機能** に任せ、自前LXCは **Cloudflare Tunnel（cloudflared）** 経由でしか外部と通信しない。
 
-- **GitHub Pages**：ビルド済み静的サイト全部（HTML/CSS/JS、記事、画像、RSS、sitemap）。このリポジトリの `main` push → GitHub Actionsでビルド → Pagesが配信。無料・CDN・メンテ不要。
-- **自前サーバー**：
-  1. **DNS/ドメインのエッジ**：カスタムドメインの向き先を自前サーバーにし、リバースプロキシ（nginx/Caddy）がGitHub Pagesへ透過的にプロキシ
-  2. **`/ads.txt` の一貫性保証**：AdSenseはブラウザに表示される実ドメインのルートで `ads.txt` を要求する。ソースはこのリポジトリの `public/ads.txt`（Pagesがビルド）一箇所のみとし、プロキシは `/ads.txt` を無加工で素通しする。デプロイ時に実ドメインへcurlして疎通確認するのを運用に組み込む
-  3. **コメント機能**：まずは **giscus**（GitHub Discussions連携、サーバー不要）で開始。将来、自前でコメントデータを持ちたくなったら自前サーバーに軽量APIを立てる
-  4. **ファーストパーティ解析**：Google Analyticsの代わりに自前サーバーでPlausible/Umami系の軽量セルフホスト解析（AdSenseスクリプトに加えてもう一つ重いサードパーティJSを載せない）
-  5. 将来の動的機能（検索、ニュースレター等）の置き場
+- **前提**：`nazet.jp` のネームサーバーをCloudflareに委任する（Cloudflareに無料でゾーン追加）必要がある。cloudflaredのトンネル・ホスト名紐付けもCloudflare側の機能なので、Cloudflareでのドメイン管理が前提になる。
+- **GitHub Pages（メインサイト）**：`nazet.jp` の通常のDNSレコード（GitHub Pages公式手順どおりのA/CNAME、Cloudflareプロキシ有効でTLS/キャッシュ込み）をGitHub Pagesへ直接向ける。`/`, `/posts/*`, `/rss.xml`, `/ads.txt`, `/sitemap.xml` など静的コンテンツは全てここで完結し、自前LXCを経由しない。`ads.txt`もGitHub Pagesが実ドメイン直下でそのまま返すため、「素通し」を別途実装する必要がなくなった（旧設計より単純化）。
+- **自前LXC（cloudflaredのみが担当する部分）**：
+  1. **cloudflared**：LXC上でトンネルクライアントとして常駐。LXC→Cloudflareへの outbound 接続のみで、80/443番ポートの開放は不要
+  2. 将来の動的機能（アクセス解析コレクタ、コメントAPI、検索、ニュースレター等）は、別ホスト名 `api.nazet.jp` をCloudflare Tunnel経由でこのLXCの該当ローカルポートにルーティングして公開する（メインサイトのドメイン`nazet.jp`とは分離し、GitHub Pages側のホスト解決と混線させない）
+  3. **コメント機能**：まずは **giscus**（GitHub Discussions連携、サーバー不要）で開始。将来、自前でコメントデータを持ちたくなったらこのLXC上に軽量APIを立て、`api.nazet.jp`経由で公開する
+  4. **ファーストパーティ解析**：Google Analyticsの代わりにこのLXC上でPlausible/Umami系の軽量セルフホスト解析（`api.nazet.jp`経由）
 
 リクエストフロー概要：
 ```
-nazet.jp（DNS→自前サーバー）
-  / , /posts/*, /rss.xml, /ads.txt, /sitemap.xml → GitHub Pagesへプロキシ（キャッシュ）
-  /api/analytics/collect → 自前サーバーのローカルサービス
-  （コメントは当面giscusでサーバー内蔵不要）
+nazet.jp（Cloudflare DNS） → GitHub Pages（直結、静的コンテンツ全部）
+api.nazet.jp（Cloudflare Tunnel） → 自前LXC上のcloudflared → localhost:<port>（解析コレクタ/コメントAPI等、将来実装）
 ```
-自前サーバー側はコンテンツの複製を持たない＝二重デプロイパイプラインにならない。
+自前LXCはコンテンツの複製を持たない＝二重デプロイパイプラインにならない。ポートは一切開放しない。
 
-### リバースプロキシ用LXCのリソース割り当て（2026-07-10決定）
+### cloudflared用LXCのリソース割り当て（2026-07-10決定、2026-07-10 cloudflared方式に更新）
 
 | 項目 | 割り当て | 理由 |
 |---|---|---|
-| vCPU | 1 core | 低トラフィックの個人ブログのリバースプロキシならTLS終端込みで十分 |
-| RAM | 1 GB | プロキシ単体なら256MB程度で足りるが、将来Umami等の解析やコメントAPIを同居させる前提で余裕を持たせた |
-| Disk | 16 GB | OS+Caddy/nginx+証明書+ログ用途に加え、将来sqlite/postgres（Umami/コメントDB）を見込んだ余裕 |
+| vCPU | 1 core | cloudflared自体は非常に軽量。将来同居させるUmami/コメントAPI込みでも1コアで十分 |
+| RAM | 1 GB | cloudflared単体なら100MB未満だが、将来Umami等の解析やコメントAPIを同居させる前提で余裕を持たせた |
+| Disk | 16 GB | OS+cloudflared+ログ用途に加え、将来sqlite/postgres（Umami/コメントDB）を見込んだ余裕 |
 | Swap | 512 MB | メモリスパイクの安全弁 |
-| ネットワーク | 80/443番ポート開放、固定IP推奨 | Let's Encrypt証明書更新とAレコード運用のため |
-| コンテナ種別 | unprivileged LXC、Debian 12 / Ubuntu 22.04ベース | 公開ポートを持つコンテナは攻撃面を狭めるためunprivileged推奨 |
+| ネットワーク | **inboundポート開放は不要**（cloudflaredはoutboundのみ）。固定IPも不要 | Cloudflare Tunnelはoutbound接続のみでLXCを外部公開するため |
+| コンテナ種別 | unprivileged LXC、**Ubuntu 26.04 LTS**（手元にあるテンプレートを使用） | unprivilegedは引き続き推奨（多層防御として、cloudflaredやその上で動くサービスの脆弱性対策） |
 
-ホスト側の空きリソースが少ない場合はRAM 512MBまで削っても単体のリバースプロキシとしては動作する。
+ホスト側の空きリソースが少ない場合はRAM 512MBまで削ってもcloudflared単体としては動作する。
 
 ## 2. 静的サイトジェネレータ：Astro
 
@@ -85,7 +83,7 @@ URLスキーム：
 
 ## 5. AdSense統合
 
-- `ads.txt` はAstroプロジェクトの `public/ads.txt` を唯一の情報源とし、プロキシは素通し
+- `ads.txt` はAstroプロジェクトの `public/ads.txt` を唯一の情報源とする。Cloudflare Tunnel方式では `nazet.jp` がGitHub Pagesに直結されるため、自前サーバー側で「素通し」を実装する必要はない（GitHub Pagesが実ドメイン直下でそのまま返す）
 - 広告スクリプトはベースレイアウトの`<head>`で1回だけ読み込み
 - 配置：**コードブロックの直前直後には絶対に広告を挟まない**。導入2〜3段落後に1枠、記事末尾（コメント欄の前）に1枠、広い画面のみサイドバー枠（モバイルは非表示）。Auto adsの「本文内自動挿入」はオフにし、配置は手動制御のみ許可（コード中央への誤挿入を防ぐ）
 
@@ -115,11 +113,13 @@ URLスキーム：
 
 実装済み（2026-07-10）：Astroプロジェクト雛形、コンテンツコレクションのスキーマ、各種ページテンプレート（記事/カテゴリ/タグ/シリーズ/ホーム/About/プライバシー）、RSS（全体+カテゴリ別）・sitemap、ads.txtプレースホルダーとAdSlotコンポーネント、GitHub Actionsのビルド+シークレットスキャン+Pagesデプロイワークフロー。動作確認用のサンプル記事2本（日英ペア、シリーズ・タグ・コードハイライト確認用）込み。`npm run build`成功、主要ページ全種を実際にブラウザで表示確認済み。
 
-ドメイン決定済み（`nazet.jp`、`astro.config.mjs`の`SITE_URL`に反映済み）。リバースプロキシ用LXCのリソース割り当ても決定済み（1節参照）。
+ドメイン決定済み（`nazet.jp`、`astro.config.mjs`の`SITE_URL`に反映済み）。ホスティング方式をCloudflare Tunnel（cloudflared）ベースに決定済み、LXCのリソース割り当て・OS（Ubuntu 26.04 LTS）も決定済み（1節参照）。
 
 未着手：
-- `nazet.jp`のDNS Aレコードを実際のLXCサーバーへ向ける
-- LXCの構築（unprivileged, 1vCPU/1GB/16GB、Caddy or nginxインストール、Let's Encrypt証明書取得）とリバースプロキシ設定（GitHub Pagesへのプロキシ、`/ads.txt`の素通し）
+- `nazet.jp`のネームサーバーをCloudflareに委任（ゾーン追加）
+- Cloudflare側でGitHub Pages向けのDNSレコードを設定（`nazet.jp` apex）
+- LXCの構築（Ubuntu 26.04 LTS, unprivileged, 1vCPU/1GB/16GB）とcloudflaredのインストール・トンネル作成
+- 将来の動的機能用に `api.nazet.jp` のCloudflare Tunnelルーティングを用意（実装時でよい、今は不要）
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み
 - Plausible/Umami等のファーストパーティ解析実装
