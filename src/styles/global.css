@@ -61,6 +61,12 @@ a {
   align-items: center;
 }
 
+.site-nav-links {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+}
+
 main {
   max-width: var(--max-width);
   margin: 0 auto;
