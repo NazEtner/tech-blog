@@ -123,8 +123,13 @@ URLスキーム：
 - GitHub Pagesを`gh api`でActionsビルドソースとして有効化、カスタムドメイン`nazet.jp`を設定済み
 - デプロイworkflowのトリガーブランチを`master`に修正（デフォルトブランチが`main`ではなく`master`だったため、当初`main`指定のままでは発火しなかった不具合を修正）
 
+実装済み（2026-07-11）：
+- Cloudflare DNSに`nazet.jp` apex → `nazetner.github.io`のCNAME（Proxied）を設定
+- `https://nazet.jp/`が実際に公開され、`/`・`/about/`・`/privacy/`・`/ads.txt`が200、draft記事は404になることを確認済み
+
+**現状: `nazet.jp` は実際に公開状態。** 中身はサンプル/About/プライバシーのみで、記事本文はまだ無い。
+
 未着手：
-- Cloudflare側でGitHub Pages向けのDNSレコードを設定（`nazet.jp` apex。GitHub Pages公式手順どおりのA/CNAME、Cloudflareプロキシ有効でTLS/キャッシュ込み）— これが済めば`nazet.jp`が実際に閲覧可能になる
 - 将来の動的機能用に `api.nazet.jp` の実サービス（アクセス解析コレクタ等）を実装し、cloudflaredのプレースホルダールートを実ポートに差し替え
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み
