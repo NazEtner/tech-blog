@@ -2,8 +2,7 @@
 title: "サンプル記事: 自作ECSの並列スケジューラはどう設計したか"
 description: "これはテンプレート確認用のサンプル記事です。実際の内容は後で差し替えます。"
 pubDate: 2026-06-20
-category: engine-architecture
-tags: ["ecs", "rust", "サンプル"]
+tags: ["ecs", "rust", "engine-architecture", "サンプル"]
 lang: ja
 sourceRepo: pameecs-rs
 draft: true

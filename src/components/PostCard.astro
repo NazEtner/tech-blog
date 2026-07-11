@@ -7,7 +7,7 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, description, pubDate, category } = entry.data;
+const { title, description, pubDate, tags } = entry.data;
 const href = getPostHref(entry);
 const dateFormatter = new Intl.DateTimeFormat(entry.data.lang === 'ja' ? 'ja-JP' : 'en-US', {
   year: 'numeric',
@@ -17,7 +17,14 @@ const dateFormatter = new Intl.DateTimeFormat(entry.data.lang === 'ja' ? 'ja-JP'
 ---
 
 <div class="post-card">
-  <p class="post-meta"><a href={`/blog/category/${category}/`}>{category}</a> &middot; {dateFormatter.format(pubDate)}</p>
+  <p class="post-meta">{dateFormatter.format(pubDate)}</p>
   <h2><a href={href}>{title}</a></h2>
   <p>{description}</p>
+  {tags.length > 0 && (
+    <ul class="tag-list">
+      {tags.map((t: string) => (
+        <li><a href={`/blog/tags/${t}/`}>#{t}</a></li>
+      ))}
+    </ul>
+  )}
 </div>

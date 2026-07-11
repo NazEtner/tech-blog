@@ -52,24 +52,19 @@ api.nazet.jp（Cloudflare Tunnel） → 自前LXC上のcloudflared → localhost
 
 ## 3. サイト構成・タクソノミー
 
-サイト全体はトップページ（`/`）から**Blog / Portfolio / About**の3リンクへ分岐する構成（2026-07-11変更、当初はBlogがそのままトップだった）。Blog配下のカテゴリ（実際の開発リポジトリ群から対応）：
-- `engine-architecture` — 自作ゲームエンジン（ECS/レンダリング内部、エンジン系譜レトロスペクティブ）
-- `netcode-multiplayer` — 決定論的ロックステップnetcode等
-- `retro-hardware` — PC-98/OPNA音源ドライバ、自作ハードウェア、リバースエンジニアリング
-- `audio-ml-tooling` — 音声ML系の個人ツール
-- `devlog-retrospective` — 横断的な開発ログ系
+サイト全体はトップページ（`/`）から**Blog / Portfolio / About**の3リンクへ分岐する構成（2026-07-11変更、当初はBlogがそのままトップだった）。
+
+Blogの分類は**タグのみ**（2026-07-11、固定5カテゴリのenum分類から変更）。カテゴリだと排他的な1記事1分類になり、たとえば「ブログ基盤（blogscan/Astroサイト）構築の話」のようなメタな記事がどのカテゴリにも収まらない問題があったため、自由なタグ付けに一本化した。タグは`tags: string[]`でfrontmatterに自由記述（例: `engine-architecture`, `netcode-multiplayer`, `retro-hardware`, `audio-ml-tooling`, `devlog-retrospective`, `meta`, `tooling`等、記事に応じて複数付けてよい）。旧カテゴリ名はタグの語彙としてそのまま使い続けて構わない。
 
 URLスキーム：
 ```
 /                                   トップページ（Blog/Portfolio/Aboutへのリンクのみ）
-/blog/                              Blogホーム（最新記事・シリーズ・カテゴリ一覧）
+/blog/                              Blogホーム（最新記事・シリーズ・タグ一覧）
 /blog/posts/<slug>/                 個別記事（スラッグは英語kebab-case固定、日本語記事でもURL安定性のため）
 /blog/en/posts/<slug>/              英語版記事
-/blog/category/<category>/          カテゴリ一覧
 /blog/tags/<tag>/                   タグ一覧
 /blog/series/<series-slug>/         シリーズ一覧
 /blog/rss.xml                       Blog全体フィード
-/blog/category/<category>/rss.xml   カテゴリ別フィード
 /portfolio/                         Portfolio（現状「準備中」プレースホルダーのみ）
 /about/
 /privacy/
@@ -78,10 +73,10 @@ URLスキーム：
 ## 4. ページテンプレート
 
 - **トップページ**：Blog/Portfolio/Aboutへの3つの大きなリンクのみのシンプルなランディング
-- **記事**：TOC自動生成、Shikiによるシンタックスハイライト、シリーズ前後ナビ、言語切替、広告枠、出典フッター（公開して問題ないリポジトリのみ、記事ごとに設定可能）
+- **記事**：TOC自動生成、Shikiによるシンタックスハイライト、シリーズ前後ナビ、言語切替、広告枠、出典フッター（公開して問題ないリポジトリのみ、記事ごとに設定可能）、タグ一覧
 - **シリーズ一覧**：各パートの一言要約と公開状況
-- **カテゴリ・タグ一覧**：ページネーション、カテゴリ説明文
-- **Blogホーム**：最新記事、シリーズ進行状況
+- **タグ一覧**：該当記事のリスト
+- **Blogホーム**：最新記事、シリーズ進行状況、使われているタグ一覧
 - **Portfolio**：現状プレースホルダーのみ、中身は未着手
 - **About**：AdSense審査で必須
 - **プライバシーポリシー**：AdSense審査で必須
@@ -94,14 +89,14 @@ URLスキーム：
 
 ## 6. AdSense審査を現実的に通すための下地
 
-- 申請前に**最低15〜20記事、5カテゴリ中3カテゴリ以上**を公開しておく（`blogscan`が既存の数千コミットから掘り起こせるので、ゼロから書くより現実的な期間で到達可能）
+- 申請前に**最低15〜20記事**を、ある程度トピックの幅（タグの多様性）を持たせて公開しておく（`blogscan`が既存の数千コミットから掘り起こせるので、ゼロから書くより現実的な期間で到達可能）
 - postmortem/how-it-worksのような実質のある内容を優先（コミットログの言い換えのような薄い内容は避ける）
 - About・プライバシーポリシーページ必須
 - sitemap.xml、リンク切れなし、迷子ページなし
 
 ## 7. 運用面
 
-- RSS（全体＋カテゴリ別）
+- RSS（全体のみ、タグ別RSSは現状無し）
 - Shikiでの言語別ハイライト（Rust, C++, HLSL/WGSL, asm, Lua, TS）
 - 画像はAstroの画像最適化、図解は極力SVG（ダークモード対応・鮮明さのため）
 - i18n：デフォルト日本語、海外興味が見込めるもの（retro-hardware, netcode-multiplayer系）から優先的に英語化
@@ -111,7 +106,7 @@ URLスキーム：
 
 1. `N:\repos\tools\blogscan\candidates\queue.yaml` で候補をレビューし、気に入ったものは `status: shortlisted` にする（または confidence 0.8以上で自動昇格）
 2. `blogscan scan` 実行時に `candidates/drafted/<id>/outline.md` が生成され、定期実行タスクが「変更の概要」と各見出しの本文プローズまで下書きする
-3. 気に入った下書きを、このリポジトリの `src/content/posts/<lang>/<slug>.md` にコピーし、frontmatter（title, category, tags, series, pubDate等）を付けて仕上げる
+3. 気に入った下書きを、このリポジトリの `src/content/posts/<lang>/<slug>.md` にコピーし、frontmatter（title, tags, series, pubDate等。categoryは廃止しタグのみ）を付けて仕上げる
 4. `master` にpush → GitHub Actionsでビルド・デプロイ
 
 ## 未着手のもの（次にやること）
@@ -133,8 +128,11 @@ URLスキーム：
 - `https://nazet.jp/`が実際に公開され、`/`・`/about/`・`/privacy/`・`/ads.txt`が200、draft記事は404になることを確認済み
 
 実装済み（2026-07-11、続き）：
-- サイト名を「なななみの倉庫」に変更し、トップページ（`/`）をBlog/Portfolio/Aboutへのランディングページに変更。Blog関連の全ページ（記事/カテゴリ/タグ/シリーズ/RSS）を`/blog/`配下に移動
+- サイト名を「なななみの倉庫」に変更し、トップページ（`/`）をBlog/Portfolio/Aboutへのランディングページに変更。Blog関連の全ページ（記事/タグ/シリーズ/RSS）を`/blog/`配下に移動
 - `/portfolio/`をプレースホルダーページとして追加
+- ヘッダーナビを簡素化（Title左・Blog/Portfolio/About右揃え、カテゴリ一覧はヘッダーから削除）
+- Aboutページの中身を執筆（名乗り・連絡先・経歴・サイトの動機）
+- **固定5カテゴリのenum分類を廃止し、タグのみの分類に変更**（メタな記事がどのカテゴリにも属さない問題があったため）。`category`フィールドをスキーマから削除、`/blog/category/*`関連ページを削除、Blogホーム・記事ページ・PostCardの表示をタグベースに変更
 
 **現状: `nazet.jp` は実際に公開状態。** 中身はサンプル/About/プライバシー/Portfolioプレースホルダーのみで、記事本文・Portfolio中身はまだ無い。
 

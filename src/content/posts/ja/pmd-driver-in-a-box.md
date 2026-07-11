@@ -2,8 +2,7 @@
 title: "サンプル記事: 1990年代の音源ドライバを現代のRustで動かす（第1回）"
 description: "これはテンプレート確認用のサンプル記事です。実際の内容は後で差し替えます。"
 pubDate: 2026-07-01
-category: retro-hardware
-tags: ["pmd", "pc98", "emulation", "サンプル"]
+tags: ["pmd", "pc98", "emulation", "retro-hardware", "サンプル"]
 series:
   slug: pmd-driver
   title: "PC-98音源ドライバを現代に繋ぐ"

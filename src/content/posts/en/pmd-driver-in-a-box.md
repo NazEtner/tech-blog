@@ -2,8 +2,7 @@
 title: "Sample post: Running a 1990s sound driver from modern Rust (Part 1)"
 description: "This is a template-verification sample post. Real content will replace it later."
 pubDate: 2026-07-01
-category: retro-hardware
-tags: ["pmd", "pc98", "emulation", "sample"]
+tags: ["pmd", "pc98", "emulation", "retro-hardware", "sample"]
 series:
   slug: pmd-driver
   title: "Bridging a PC-98 sound driver into the present"

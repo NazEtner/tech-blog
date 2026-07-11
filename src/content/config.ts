@@ -1,13 +1,5 @@
 import { defineCollection, z } from 'astro:content';
 
-export const CATEGORIES = [
-  'engine-architecture',
-  'netcode-multiplayer',
-  'retro-hardware',
-  'audio-ml-tooling',
-  'devlog-retrospective',
-] as const;
-
 const posts = defineCollection({
   type: 'content',
   schema: z.object({
@@ -15,7 +7,6 @@ const posts = defineCollection({
     description: z.string(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    category: z.enum(CATEGORIES),
     tags: z.array(z.string()).default([]),
     series: z
       .object({
