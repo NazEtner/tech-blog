@@ -107,7 +107,7 @@ URLスキーム：
 1. `N:\repos\tools\blogscan\candidates\queue.yaml` で候補をレビューし、気に入ったものは `status: shortlisted` にする（または confidence 0.8以上で自動昇格）
 2. `blogscan scan` 実行時に `candidates/drafted/<id>/outline.md` が生成され、定期実行タスクが「変更の概要」と各見出しの本文プローズまで下書きする
 3. 気に入った下書きを、このリポジトリの `src/content/posts/<lang>/<slug>.md` にコピーし、frontmatter（title, category, tags, series, pubDate等）を付けて仕上げる
-4. `main` にpush → GitHub Actionsでビルド・デプロイ
+4. `master` にpush → GitHub Actionsでビルド・デプロイ
 
 ## 未着手のもの（次にやること）
 
@@ -115,13 +115,18 @@ URLスキーム：
 
 ドメイン決定済み（`nazet.jp`、`astro.config.mjs`の`SITE_URL`に反映済み）。ホスティング方式をCloudflare Tunnel（cloudflared）ベースに決定済み、LXCのリソース割り当て・OS（Ubuntu 26.04 LTS）も決定済み（1節参照）。
 
+実装済み（2026-07-10、続き）：
+- ネームサーバーをCloudflareに委任済み
+- CT163（Ubuntu 26.04 LTS）を構築、cloudflaredをインストールしダッシュボード管理トンネル（`techblog-ct163`）を接続済み。`api.nazet.jp`はプレースホルダー（`localhost:8080`、実サービス未実装のため502）でルート登録済み
+- サンプル記事3本は`draft: true`にして公開時にビルドから除外されるようにした
+- `public/CNAME`（`nazet.jp`）を追加。GitHub Pagesはpublicリポジトリ [NazEtner/tech-blog](https://github.com/NazEtner/tech-blog) として作成・push済み（GitHubアカウントがFreeプランのためprivateリポジトリからのPages公開は不可、publicで運用）
+- GitHub Pagesを`gh api`でActionsビルドソースとして有効化、カスタムドメイン`nazet.jp`を設定済み
+- デプロイworkflowのトリガーブランチを`master`に修正（デフォルトブランチが`main`ではなく`master`だったため、当初`main`指定のままでは発火しなかった不具合を修正）
+
 未着手：
-- `nazet.jp`のネームサーバーをCloudflareに委任（ゾーン追加）
-- Cloudflare側でGitHub Pages向けのDNSレコードを設定（`nazet.jp` apex）
-- LXCの構築（Ubuntu 26.04 LTS, unprivileged, 1vCPU/1GB/16GB）とcloudflaredのインストール・トンネル作成
-- 将来の動的機能用に `api.nazet.jp` のCloudflare Tunnelルーティングを用意（実装時でよい、今は不要）
+- Cloudflare側でGitHub Pages向けのDNSレコードを設定（`nazet.jp` apex。GitHub Pages公式手順どおりのA/CNAME、Cloudflareプロキシ有効でTLS/キャッシュ込み）— これが済めば`nazet.jp`が実際に閲覧可能になる
+- 将来の動的機能用に `api.nazet.jp` の実サービス（アクセス解析コレクタ等）を実装し、cloudflaredのプレースホルダールートを実ポートに差し替え
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み
 - Plausible/Umami等のファーストパーティ解析実装
 - サンプル記事をblogscanの実際の下書きに差し替え、記事本数を増やす（AdSense申請には15〜20記事が目安）
-- GitHub上にリモートリポジトリを作成しpush（現状ローカルのみ）
