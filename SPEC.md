@@ -98,9 +98,13 @@ URLスキーム：
 
 ## 未着手のもの（次にやること）
 
-- Astroプロジェクトの雛形（`npm create astro@latest` 相当）
-- コンテンツコレクションのスキーマ定義（`src/content/config.ts`）
-- 各種ページテンプレート実装
-- GitHub Actionsワークフロー（ビルド・シークレットスキャン・Pagesデプロイ）
+実装済み（2026-07-10）：Astroプロジェクト雛形、コンテンツコレクションのスキーマ、各種ページテンプレート（記事/カテゴリ/タグ/シリーズ/ホーム/About/プライバシー）、RSS（全体+カテゴリ別）・sitemap、ads.txtプレースホルダーとAdSlotコンポーネント、GitHub Actionsのビルド+シークレットスキャン+Pagesデプロイワークフロー。動作確認用のサンプル記事2本（日英ペア、シリーズ・タグ・コードハイライト確認用）込み。`npm run build`成功、主要ページ全種を実際にブラウザで表示確認済み。
+
+未着手：
+- 実際のドメイン取得・確定（`astro.config.mjs`の`SITE_URL`は`https://example.com`のプレースホルダー）
 - 自前サーバー側のリバースプロキシ設定（ドメイン確定後）
-- AdSenseアカウント申請
+- AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
+- giscusコメント埋め込み
+- Plausible/Umami等のファーストパーティ解析実装
+- サンプル記事をblogscanの実際の下書きに差し替え、記事本数を増やす（AdSense申請には15〜20記事が目安）
+- GitHub上にリモートリポジトリを作成しpush（現状ローカルのみ）
