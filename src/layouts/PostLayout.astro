@@ -1,0 +1,81 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import AdSlot from '../components/AdSlot.astro';
+import SeriesNav from '../components/SeriesNav.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  entry: CollectionEntry<'posts'>;
+  headings: Heading[];
+  seriesEntries?: CollectionEntry<'posts'>[];
+  langAlternateHref?: string;
+}
+
+const { entry, headings, seriesEntries, langAlternateHref } = Astro.props;
+const { title, description, pubDate, updatedDate, category, tags, series, lang, sourceRepo } =
+  entry.data;
+const toc = headings.filter((h) => h.depth === 2);
+
+const dateFormatter = new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={title} description={description}>
+  <article>
+    <header>
+      <p class="post-meta">
+        <a href={`/category/${category}/`}>{category}</a>
+        &middot;
+        {dateFormatter.format(pubDate)}
+        {updatedDate && <> (更新: {dateFormatter.format(updatedDate)})</>}
+      </p>
+      <h1>{title}</h1>
+      {tags.length > 0 && (
+        <ul class="tag-list">
+          {tags.map((t: string) => (
+            <li><a href={`/tags/${t}/`}>#{t}</a></li>
+          ))}
+        </ul>
+      )}
+      {langAlternateHref && (
+        <p><a href={langAlternateHref}>{lang === 'ja' ? 'Read in English' : '日本語で読む'}</a></p>
+      )}
+    </header>
+
+    {toc.length > 1 && (
+      <nav aria-label="table of contents">
+        <strong>目次</strong>
+        <ul>
+          {toc.map((h) => (
+            <li><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    <AdSlot variant="in-article" />
+
+    <div class="post-content">
+      <slot />
+    </div>
+
+    {sourceRepo && (
+      <p class="post-meta">出典リポジトリ: <code>{sourceRepo}</code></p>
+    )}
+
+    {seriesEntries && series && (
+      <SeriesNav seriesEntries={seriesEntries} currentSlug={entry.slug} seriesTitle={series.title} />
+    )}
+
+    <AdSlot variant="end-of-article" />
+  </article>
+</BaseLayout>

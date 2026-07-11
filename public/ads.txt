@@ -1,0 +1,3 @@
+# AdSense not yet approved for this site. Once approved, replace this file
+# with the single authorization line Google provides, e.g.:
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

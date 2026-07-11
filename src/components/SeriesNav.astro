@@ -1,0 +1,28 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getPostHref } from '../utils/posts';
+
+interface Props {
+  seriesEntries: CollectionEntry<'posts'>[];
+  currentSlug: string;
+  seriesTitle: string;
+}
+
+const { seriesEntries, currentSlug, seriesTitle } = Astro.props;
+const sorted = [...seriesEntries].sort((a, b) => (a.data.series?.part ?? 0) - (b.data.series?.part ?? 0));
+---
+
+<nav aria-label="series navigation" class="ad-slot" style="text-align:left; border-style: solid;">
+  <strong>シリーズ: {seriesTitle}</strong>
+  <ol>
+    {sorted.map((e) => (
+      <li>
+        {e.slug === currentSlug ? (
+          <strong>{e.data.title}（この記事）</strong>
+        ) : (
+          <a href={getPostHref(e)}>{e.data.title}</a>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>

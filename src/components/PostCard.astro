@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getPostHref } from '../utils/posts';
+
+interface Props {
+  entry: CollectionEntry<'posts'>;
+}
+
+const { entry } = Astro.props;
+const { title, description, pubDate, category } = entry.data;
+const href = getPostHref(entry);
+const dateFormatter = new Intl.DateTimeFormat(entry.data.lang === 'ja' ? 'ja-JP' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<div class="post-card">
+  <p class="post-meta"><a href={`/category/${category}/`}>{category}</a> &middot; {dateFormatter.format(pubDate)}</p>
+  <h2><a href={href}>{title}</a></h2>
+  <p>{description}</p>
+</div>

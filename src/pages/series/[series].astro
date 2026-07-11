@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPostHref } from '../../utils/posts';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', (p) => !p.data.draft && p.data.series);
+  const seriesMap = new Map<string, { title: string; posts: typeof allPosts }>();
+
+  for (const post of allPosts) {
+    const s = post.data.series!;
+    if (!seriesMap.has(s.slug)) {
+      seriesMap.set(s.slug, { title: s.title, posts: [] });
+    }
+    seriesMap.get(s.slug)!.posts.push(post);
+  }
+
+  return [...seriesMap.entries()].map(([slug, { title, posts }]) => ({
+    params: { series: slug },
+    props: {
+      title,
+      posts: posts.sort((a, b) => (a.data.series?.part ?? 0) - (b.data.series?.part ?? 0)),
+    },
+  }));
+}
+
+const { title, posts } = Astro.props;
+---
+
+<BaseLayout title={title}>
+  <h1>シリーズ: {title}</h1>
+  <ol>
+    {posts.map((entry: any) => (
+      <li>
+        <a href={getPostHref(entry)}>{entry.data.title}</a>
+        {entry.data.draft && <em>（未公開）</em>}
+      </li>
+    ))}
+  </ol>
+</BaseLayout>
