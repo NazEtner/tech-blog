@@ -6,6 +6,7 @@ category: engine-architecture
 tags: ["ecs", "rust", "サンプル"]
 lang: ja
 sourceRepo: pameecs-rs
+draft: true
 ---
 
 > **これはサンプル記事です。** カテゴリページ・タグページの動作確認用です。

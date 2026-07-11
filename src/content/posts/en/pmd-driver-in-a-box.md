@@ -10,6 +10,7 @@ series:
   part: 1
 lang: en
 sourceRepo: pmdhost-rs
+draft: true
 ---
 
 > **This is a sample post.** It exists to verify page templates (table of contents, series nav, syntax highlighting, tags) render correctly; the real article will be written later.
