@@ -1,19 +1,19 @@
 ---
 import { getCollection } from 'astro:content';
-import PostLayout from '../../layouts/PostLayout.astro';
-import { getPostSlug, getPostHref } from '../../utils/posts';
+import PostLayout from '../../../../layouts/PostLayout.astro';
+import { getPostSlug, getPostHref } from '../../../../utils/posts';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('posts', (p) => !p.data.draft);
-  const jaPosts = allPosts.filter((p) => p.data.lang === 'ja');
+  const enPosts = allPosts.filter((p) => p.data.lang === 'en');
 
-  return jaPosts.map((entry) => {
+  return enPosts.map((entry) => {
     const slug = getPostSlug(entry);
     const seriesEntries = entry.data.series
       ? allPosts.filter((p) => p.data.series?.slug === entry.data.series?.slug)
       : undefined;
-    const enCounterpart = allPosts.find(
-      (p) => p.data.lang === 'en' && getPostSlug(p) === slug
+    const jaCounterpart = allPosts.find(
+      (p) => p.data.lang === 'ja' && getPostSlug(p) === slug
     );
 
     return {
@@ -21,7 +21,7 @@ export async function getStaticPaths() {
       props: {
         entry,
         seriesEntries,
-        langAlternateHref: enCounterpart ? getPostHref(enCounterpart) : undefined,
+        langAlternateHref: jaCounterpart ? getPostHref(jaCounterpart) : undefined,
       },
     };
   });

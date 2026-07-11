@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPostHref } from '../../utils/posts';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPostHref } from '../../../utils/posts';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('posts', (p) => !p.data.draft && p.data.series);

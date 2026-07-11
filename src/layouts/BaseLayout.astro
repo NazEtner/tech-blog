@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { title, description = 'いつものコードを、たまには読み物として。' } = Astro.props;
-const siteTitle = 'tech-blog';
+const siteTitle = 'なななみの倉庫';
 const pageTitle = title === siteTitle ? siteTitle : `${title} | ${siteTitle}`;
 
 // Left unset until AdSense approval; when set, BaseLayout loads the
@@ -24,7 +24,7 @@ const adsenseClientId = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/blog/rss.xml" />
     {adsenseClientId && (
       <script
         async
@@ -37,9 +37,11 @@ const adsenseClientId = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
     <header class="site-header">
       <nav class="site-nav">
         <a href="/"><strong>{siteTitle}</strong></a>
+        <a href="/blog/">Blog</a>
         {CATEGORIES.map((c) => (
-          <a href={`/category/${c}/`}>{c}</a>
+          <a href={`/blog/category/${c}/`}>{c}</a>
         ))}
+        <a href="/portfolio/">Portfolio</a>
         <a href="/about/">About</a>
       </nav>
     </header>
@@ -48,9 +50,9 @@ const adsenseClientId = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
     </main>
     <footer class="site-footer">
       <div class="site-nav">
-        <span>&copy; {new Date().getFullYear()} tech-blog</span>
+        <span>&copy; {new Date().getFullYear()} {siteTitle}</span>
         <a href="/privacy/">プライバシーポリシー</a>
-        <a href="/rss.xml">RSS</a>
+        <a href="/blog/rss.xml">RSS</a>
       </div>
     </footer>
   </body>

@@ -1,49 +1,47 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
-import { CATEGORIES } from '../content/config';
 
-const allPosts = await getCollection('posts', (p) => !p.data.draft);
-const recent = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 10);
-
-const seriesInProgress = [
-  ...new Map(
-    allPosts
-      .filter((p) => p.data.series)
-      .map((p) => [p.data.series!.slug, p.data.series!])
-  ).values(),
+const links = [
+  { href: '/blog/', label: 'Blog', desc: '技術ブログ。ゲームエンジン・ネットコード・レトロハードウェア・音声/MLツールなどの開発から面白かったものを書いています。' },
+  { href: '/portfolio/', label: 'Portfolio', desc: '作ってきたものの紹介（準備中）。' },
+  { href: '/about/', label: 'About', desc: 'このサイトについて。' },
 ];
 ---
 
-<BaseLayout title="tech-blog">
-  <p>
-    ゲームエンジン、ネットコード、レトロハードウェア、音声/ML系の個人開発から、面白かったものを厳選して書いています。
-  </p>
-
-  {seriesInProgress.length > 0 && (
-    <section>
-      <h2>シリーズ</h2>
-      <ul>
-        {seriesInProgress.map((s) => (
-          <li><a href={`/series/${s.slug}/`}>{s.title}</a></li>
-        ))}
-      </ul>
-    </section>
-  )}
-
-  <section>
-    <h2>最近の記事</h2>
-    {recent.length === 0 && <p>まだ記事がありません。</p>}
-    {recent.map((entry) => <PostCard entry={entry} />)}
-  </section>
-
-  <section>
-    <h2>カテゴリ</h2>
-    <ul>
-      {CATEGORIES.map((c) => (
-        <li><a href={`/category/${c}/`}>{c}</a></li>
-      ))}
-    </ul>
-  </section>
+<BaseLayout title="なななみの倉庫">
+  <ul class="landing-links">
+    {links.map((l) => (
+      <li>
+        <a href={l.href}>
+          <h2>{l.label}</h2>
+          <p>{l.desc}</p>
+        </a>
+      </li>
+    ))}
+  </ul>
 </BaseLayout>
+
+<style>
+  .landing-links {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .landing-links a {
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .landing-links h2 {
+    margin: 0 0 0.5rem 0;
+    color: var(--color-accent);
+  }
+  .landing-links p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+</style>

@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { CATEGORIES } from '../../content/config';
+
+const allPosts = await getCollection('posts', (p) => !p.data.draft);
+const recent = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 10);
+
+const seriesInProgress = [
+  ...new Map(
+    allPosts
+      .filter((p) => p.data.series)
+      .map((p) => [p.data.series!.slug, p.data.series!])
+  ).values(),
+];
+---
+
+<BaseLayout title="Blog">
+  <p>
+    ゲームエンジン、ネットコード、レトロハードウェア、音声/ML系の個人開発から、面白かったものを厳選して書いています。
+  </p>
+
+  {seriesInProgress.length > 0 && (
+    <section>
+      <h2>シリーズ</h2>
+      <ul>
+        {seriesInProgress.map((s) => (
+          <li><a href={`/blog/series/${s.slug}/`}>{s.title}</a></li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section>
+    <h2>最近の記事</h2>
+    {recent.length === 0 && <p>まだ記事がありません。</p>}
+    {recent.map((entry) => <PostCard entry={entry} />)}
+  </section>
+
+  <section>
+    <h2>カテゴリ</h2>
+    <ul>
+      {CATEGORIES.map((c) => (
+        <li><a href={`/blog/category/${c}/`}>{c}</a></li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>

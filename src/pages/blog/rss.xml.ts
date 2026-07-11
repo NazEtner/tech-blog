@@ -1,12 +1,12 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { getPostHref } from '../utils/posts';
+import { getPostHref } from '../../utils/posts';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('posts', (p) => !p.data.draft);
   return rss({
-    title: 'tech-blog',
+    title: 'なななみの倉庫 Blog',
     description: 'いつものコードを、たまには読み物として。',
     site: context.site!,
     items: posts

@@ -17,7 +17,7 @@ const dateFormatter = new Intl.DateTimeFormat(entry.data.lang === 'ja' ? 'ja-JP'
 ---
 
 <div class="post-card">
-  <p class="post-meta"><a href={`/category/${category}/`}>{category}</a> &middot; {dateFormatter.format(pubDate)}</p>
+  <p class="post-meta"><a href={`/blog/category/${category}/`}>{category}</a> &middot; {dateFormatter.format(pubDate)}</p>
   <h2><a href={href}>{title}</a></h2>
   <p>{description}</p>
 </div>

@@ -33,7 +33,7 @@ const dateFormatter = new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-US',
   <article>
     <header>
       <p class="post-meta">
-        <a href={`/category/${category}/`}>{category}</a>
+        <a href={`/blog/category/${category}/`}>{category}</a>
         &middot;
         {dateFormatter.format(pubDate)}
         {updatedDate && <> (更新: {dateFormatter.format(updatedDate)})</>}
@@ -42,7 +42,7 @@ const dateFormatter = new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-US',
       {tags.length > 0 && (
         <ul class="tag-list">
           {tags.map((t: string) => (
-            <li><a href={`/tags/${t}/`}>#{t}</a></li>
+            <li><a href={`/blog/tags/${t}/`}>#{t}</a></li>
           ))}
         </ul>
       )}

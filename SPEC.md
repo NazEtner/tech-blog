@@ -1,8 +1,8 @@
-# tech-blog 仕様書
+# なななみの倉庫 仕様書（リポジトリ名: tech-blog）
 
-個人の技術ブログ。日々の開発（ゲームエンジン、ネットコード、レトロハードウェア、音声/ML系ツール等）の中から面白いものを厳選して公開し、Google AdSenseで広告収入を得る。
+個人サイト。トップページから **Blog** / **Portfolio** / **About** の3つに分かれる。Blogは日々の開発（ゲームエンジン、ネットコード、レトロハードウェア、音声/ML系ツール等）の中から面白いものを厳選して公開し、Google AdSenseで広告収入を得るのが主目的。Portfolioは作ってきたものの紹介（現状プレースホルダー、中身未着手）。
 
-記事候補は [`blogscan`](N:\repos\tools\blogscan)（別リポジトリ）が自動生成する。厳選・執筆は人間が行う。このリポジトリはサイト本体（ビルド設定・テンプレート・記事コンテンツ）を持つ。
+記事候補は [`blogscan`](N:\repos\tools\blogscan)（別リポジトリ）が自動生成する。厳選・執筆は人間が行う。このリポジトリはサイト本体（ビルド設定・テンプレート・記事コンテンツ）を持つ。リポジトリ名は`tech-blog`のまま（GitHub上の実名）だが、サイトの表示名・ブランドは「なななみの倉庫」。
 
 現状: サイト実装済み（2026-07-10、ビルド・主要ページ確認済み）。ドメイン決定済み。ドメイン反映・自前サーバー構築・AdSense申請等は未着手。
 
@@ -52,7 +52,7 @@ api.nazet.jp（Cloudflare Tunnel） → 自前LXC上のcloudflared → localhost
 
 ## 3. サイト構成・タクソノミー
 
-カテゴリ（実際の開発リポジトリ群から対応）：
+サイト全体はトップページ（`/`）から**Blog / Portfolio / About**の3リンクへ分岐する構成（2026-07-11変更、当初はBlogがそのままトップだった）。Blog配下のカテゴリ（実際の開発リポジトリ群から対応）：
 - `engine-architecture` — 自作ゲームエンジン（ECS/レンダリング内部、エンジン系譜レトロスペクティブ）
 - `netcode-multiplayer` — 決定論的ロックステップnetcode等
 - `retro-hardware` — PC-98/OPNA音源ドライバ、自作ハードウェア、リバースエンジニアリング
@@ -61,23 +61,28 @@ api.nazet.jp（Cloudflare Tunnel） → 自前LXC上のcloudflared → localhost
 
 URLスキーム：
 ```
-/posts/<slug>/                     個別記事（スラッグは英語kebab-case固定、日本語記事でもURL安定性のため）
-/en/posts/<slug>/  /ja/posts/<slug>/   言語バリアント
-/category/<category>/              カテゴリ一覧
-/tags/<tag>/                       タグ一覧
-/series/<series-slug>/             シリーズ一覧
+/                                   トップページ（Blog/Portfolio/Aboutへのリンクのみ）
+/blog/                              Blogホーム（最新記事・シリーズ・カテゴリ一覧）
+/blog/posts/<slug>/                 個別記事（スラッグは英語kebab-case固定、日本語記事でもURL安定性のため）
+/blog/en/posts/<slug>/              英語版記事
+/blog/category/<category>/          カテゴリ一覧
+/blog/tags/<tag>/                   タグ一覧
+/blog/series/<series-slug>/         シリーズ一覧
+/blog/rss.xml                       Blog全体フィード
+/blog/category/<category>/rss.xml   カテゴリ別フィード
+/portfolio/                         Portfolio（現状「準備中」プレースホルダーのみ）
 /about/
 /privacy/
-/rss.xml                           全体フィード
-/category/<category>/rss.xml       カテゴリ別フィード
 ```
 
 ## 4. ページテンプレート
 
+- **トップページ**：Blog/Portfolio/Aboutへの3つの大きなリンクのみのシンプルなランディング
 - **記事**：TOC自動生成、Shikiによるシンタックスハイライト、シリーズ前後ナビ、言語切替、広告枠、出典フッター（公開して問題ないリポジトリのみ、記事ごとに設定可能）
 - **シリーズ一覧**：各パートの一言要約と公開状況
 - **カテゴリ・タグ一覧**：ページネーション、カテゴリ説明文
-- **ホーム**：最新記事、シリーズ進行状況、短いAbout
+- **Blogホーム**：最新記事、シリーズ進行状況
+- **Portfolio**：現状プレースホルダーのみ、中身は未着手
 - **About**：AdSense審査で必須
 - **プライバシーポリシー**：AdSense審査で必須
 
@@ -127,9 +132,14 @@ URLスキーム：
 - Cloudflare DNSに`nazet.jp` apex → `nazetner.github.io`のCNAME（Proxied）を設定
 - `https://nazet.jp/`が実際に公開され、`/`・`/about/`・`/privacy/`・`/ads.txt`が200、draft記事は404になることを確認済み
 
-**現状: `nazet.jp` は実際に公開状態。** 中身はサンプル/About/プライバシーのみで、記事本文はまだ無い。
+実装済み（2026-07-11、続き）：
+- サイト名を「なななみの倉庫」に変更し、トップページ（`/`）をBlog/Portfolio/Aboutへのランディングページに変更。Blog関連の全ページ（記事/カテゴリ/タグ/シリーズ/RSS）を`/blog/`配下に移動
+- `/portfolio/`をプレースホルダーページとして追加
+
+**現状: `nazet.jp` は実際に公開状態。** 中身はサンプル/About/プライバシー/Portfolioプレースホルダーのみで、記事本文・Portfolio中身はまだ無い。
 
 未着手：
+- Portfolioページの中身（[[portfolio-project]]の棚卸し結果をベースに構築）
 - 将来の動的機能用に `api.nazet.jp` の実サービス（アクセス解析コレクタ等）を実装し、cloudflaredのプレースホルダールートを実ポートに差し替え
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み

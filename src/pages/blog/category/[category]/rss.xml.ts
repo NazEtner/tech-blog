@@ -1,7 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { getPostHref } from '../../../utils/posts';
-import { CATEGORIES } from '../../../content/config';
+import { getPostHref } from '../../../../utils/posts';
+import { CATEGORIES } from '../../../../content/config';
 import type { APIContext } from 'astro';
 
 export async function getStaticPaths() {
@@ -12,8 +12,8 @@ export async function GET(context: APIContext) {
   const category = context.params.category as string;
   const posts = await getCollection('posts', (p) => !p.data.draft && p.data.category === category);
   return rss({
-    title: `tech-blog: ${category}`,
-    description: `tech-blogのカテゴリ「${category}」のフィード`,
+    title: `なななみの倉庫 Blog: ${category}`,
+    description: `なななみの倉庫のカテゴリ「${category}」のフィード`,
     site: context.site!,
     items: posts
       .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
