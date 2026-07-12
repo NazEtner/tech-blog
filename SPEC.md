@@ -65,7 +65,7 @@ URLスキーム：
 /blog/tags/<tag>/                   タグ一覧
 /blog/series/<series-slug>/         シリーズ一覧
 /blog/rss.xml                       Blog全体フィード
-/portfolio/                         Portfolio（現状「準備中」プレースホルダーのみ）
+/portfolio/                         Portfolio（公開プロジェクトの紹介）
 /about/
 /privacy/
 ```
@@ -77,7 +77,7 @@ URLスキーム：
 - **シリーズ一覧**：各パートの一言要約と公開状況
 - **タグ一覧**：該当記事のリスト
 - **Blogホーム**：最新記事、シリーズ進行状況、使われているタグ一覧
-- **Portfolio**：現状プレースホルダーのみ、中身は未着手
+- **Portfolio**：公開プロジェクトの紹介（掲載方針は下記2026-07-12の項を参照）
 - **About**：AdSense審査で必須
 - **プライバシーポリシー**：AdSense審査で必須
 
@@ -141,10 +141,15 @@ URLスキーム：
 - `robots.txt` のSitemap参照を絶対URLに修正（規格上必須）
 - **CIのSEOゲート** `scripts/seo-check.mjs`（`npm run seo:check`、依存パッケージなし）: deploy.ymlのビルド直後・シークレットスキャン前に実行し、エラーがあればデプロイを止める。エラー扱い＝メタ欠落（title/description/canonical/OGP/`<html lang>`）、canonical不一致、内部リンク切れ、sitemap網羅性の不整合（載っていないページ/存在しないURL）、og:imageが指す画像がdistに実在しない、RSS/robots/OG画像の欠落、slugがkebab-case以外、言語内slug重複。警告扱い（デプロイは止めない）＝title>45字、description 30〜160字圏外、タグなし、h1が1個でない、alt無しimg。日本語タグ等の非ASCII URLはパーセントエンコードで比較
 
-**現状: `nazet.jp` は実際に公開状態。** 中身はサンプル/About/プライバシー/Portfolioプレースホルダーのみで、記事本文・Portfolio中身はまだ無い。
+実装済み（2026-07-12、続き）: **Portfolioページの中身**
+- 掲載方針: **GitHubでpublicになっているリポジトリのみ**（本人の許可済み）。ただし`cmdSysSample`は本人の意向で除外
+- 掲載中: PameECS（C++/D3D12のECSゲームエンジン）、pmdtracker-rs（PMD向けトラッカー型エディタ）、pmdhost-rs（PMDを8086エミュで実行し自作YMF288ボードで鳴らすホスト）、8bitPlayer（コマンド駆動の8bit風プレイヤー）、このサイト自体（tech-blog+blogscan、bootstrap記事への内部リンク付き）
+- 各プロジェクトは要約+技術的な詳細2段落程度+GitHubリンクで、AdSense審査対策として「準備中」プレースホルダーを解消し実質コンテンツ化した。内容はREADME等の公開情報のみに基づく
+
+**現状: `nazet.jp` は実際に公開状態。** 中身はサンプル記事1本(bootstrap)/About/プライバシー/Portfolioで、AdSense申請の目安（15〜20記事）にはまだ記事数が足りない。
 
 未着手：
-- Portfolioページの中身（[[portfolio-project]]の棚卸し結果をベースに構築）
+- Portfolioの拡充（スクリーンショット・デモ等。テキストベースの初版は実装済み）
 - 将来の動的機能用に `api.nazet.jp` の実サービス（アクセス解析コレクタ等）を実装し、cloudflaredのプレースホルダールートを実ポートに差し替え
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み

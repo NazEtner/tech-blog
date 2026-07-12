@@ -1,8 +1,117 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+interface Project {
+  name: string;
+  repo: string;
+  tech: string[];
+  summary: string;
+  details: string[];
+  relatedPost?: { href: string; title: string };
+}
+
+// GitHubでpublicになっているリポジトリのみ掲載する方針。
+const projects: Project[] = [
+  {
+    name: 'PameECS',
+    repo: 'https://github.com/NazEtner/PameECS',
+    tech: ['C++', 'Direct3D 12', 'ECS'],
+    summary: 'ECS（Entity Component System）を設計の中心に据えた自作ゲームエンジン。開発中。',
+    details: [
+      '「基本的にECS」という名前の通り、ゲームロジックをECSで記述することを前提に、その周辺基盤を一式自作しています。アーカイブファイル（アセットのパッケージング）とその中のコンフィグ読み込み、仮想ファイルシステム、入力システム、オーディオシステム、スクリプト読み込みまでが実装済みです。',
+      '描画はDirect3D 12で、ECS側のデータをレンダラーに引き渡すインターフェイスを設計して繋いでいます。ECSのスケジューリングや設計判断については、このブログで記事として掘り下げていく予定です。',
+    ],
+  },
+  {
+    name: 'pmdtracker-rs',
+    repo: 'https://github.com/NazEtner/pmdtracker-rs',
+    tech: ['Rust', 'egui', 'PMD', 'YMF288'],
+    summary:
+      'PMD（PC-98向けFM音源ドライバ）の楽曲を打ち込むトラッカー型エディタ。FamiTracker風のUIから .M ファイルを生成する。',
+    details: [
+      'PMDの楽曲データ（.M）は本来MMLをコンパイルして作りますが、これをFamiTracker風のトラッカーグリッドで打ち込めるようにしたエディタです。純Rust + egui/eframe製で、内部の曲モデルをMMLに変換し、MC.EXE（MS-DOS Player経由で実行）で .M までビルドします。',
+      'ターゲットはYMF288（OPN3-L）= FM 6ch + SSG 3ch + リズム。FM音色エディタ（ALG/FB + 4オペレータ×10パラメータ）、チップリズムとSSGドラムを同一タイムラインに並べるリズム2系統、オーダーリストとループ点、反復をMMLのループ構文や変数に畳み込むサイズ最適化エクスポートを備えています。試聴はPMDWinを実行時ロードして行い、再生行をグリッド上で追従ハイライトします。',
+    ],
+  },
+  {
+    name: 'pmdhost-rs',
+    repo: 'https://github.com/NazEtner/pmdhost-rs',
+    tech: ['Rust', '8086エミュレーション', 'YMF288', '自作ハードウェア'],
+    summary:
+      '本物のPMD（PMD.ASM）を8086エミュレータ上で実行し、演奏データを自作YMF288ボードで鳴らすホストプログラム。',
+    details: [
+      'PMDの挙動を再実装するのではなく、KAJA氏によるオリジナルのPMDをYMF288向けにアセンブルしたバイナリを8086エミュレータ（libx86emu）上でそのまま実行します。エミュ内でOPNAポートへ発行されるout命令を捕獲してパケットに変換し、名前付きパイプ経由でボードドライバに送ることで、実機のYMF288ボードから音を出します。',
+      'テンポの律速をホスト側のタイマーではなくボード上の実YMF288タイマー/IRQに任せる「board-paced」な再生モデルを採っており、PMDのタイマ割り込み1tickを1バッチとしてボードのバッファに積み、送信キュー長で背圧をかけます。ホスト側の処理落ちがテンポの乱れに直結しない構成です。ビルドはWSL2からWindows向けのクロスビルドで、C製のエミュレータを静的リンクしています。',
+    ],
+  },
+  {
+    name: '8bitPlayer',
+    repo: 'https://github.com/NazEtner/8bitPlayer',
+    tech: ['C++', 'Windows', 'オーディオ'],
+    summary: 'Windows向けの8bit風サウンドプレイヤー。テキストコマンドで曲を記述して再生する。',
+    details: [
+      'note（音符）、set_bpm（テンポ）、コマンドグループの定義と実行といったコマンドをインタプリタで解釈し、8bit風のサウンドを再生する小さなプレイヤーです。MML的な発想の曲記述を、コマンドシステムとして一から設計・実装しています。',
+    ],
+  },
+  {
+    name: 'このサイト（tech-blog + blogscan）',
+    repo: 'https://github.com/NazEtner/tech-blog',
+    tech: ['Astro', 'GitHub Actions', 'Cloudflare'],
+    summary:
+      'このサイト自体もプロジェクトのひとつ。過去のコミット履歴から記事候補を自動発掘するツール（blogscan）と組み合わせて運用している。',
+    details: [
+      'Astro製の静的サイトをGitHub Pages + Cloudflareで配信しています。記事候補の発掘は、手元のリポジトリ群のコミット履歴をスキャンして「記事になりそうな変更」を自動抽出・下書き化するツールに任せ、人間は厳選と仕上げに集中する分担です。ビルド時にはOGP・構造化データ・記事別OG画像の自動生成と、メタデータ・リンク切れ・sitemapをCIで検査するSEOゲートが走ります。',
+    ],
+    relatedPost: {
+      href: '/blog/posts/blog-bootstrap/',
+      title: 'Webに興味がないからClaude Codeにサイトを作らせた',
+    },
+  },
+];
 ---
 
-<BaseLayout title="Portfolio">
+<BaseLayout
+  title="Portfolio"
+  description="自作ゲームエンジン（PameECS）、PC-98音源ドライバPMDまわりのツール群（pmdtracker-rs / pmdhost-rs）など、公開しているプロジェクトの紹介。"
+>
   <h1>Portfolio</h1>
-  <p>準備中です。作ってきたゲームエンジンやツール類をここにまとめる予定です。</p>
+  <p>
+    公開しているプロジェクトの紹介です。ゲームエンジン、レトロ音源まわりのツール、
+    オーディオ系の小物が中心で、いずれもソースコードはGitHubで公開しています。
+    それぞれの設計の掘り下げは<a href="/blog/">Blog</a>に書いていきます。
+  </p>
+
+  {projects.map((p) => (
+    <section class="portfolio-project">
+      <h2>{p.name}</h2>
+      <ul class="tag-list">
+        {p.tech.map((t) => (
+          <li>#{t}</li>
+        ))}
+      </ul>
+      <p><strong>{p.summary}</strong></p>
+      {p.details.map((d) => (
+        <p>{d}</p>
+      ))}
+      {p.relatedPost && (
+        <p>
+          関連記事: <a href={p.relatedPost.href}>{p.relatedPost.title}</a>
+        </p>
+      )}
+      <p>
+        <a href={p.repo} rel="noopener">GitHubで見る →</a>
+      </p>
+    </section>
+  ))}
 </BaseLayout>
+
+<style>
+  .portfolio-project {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .portfolio-project h2 {
+    margin-top: 0;
+  }
+</style>
