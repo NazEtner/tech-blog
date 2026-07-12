@@ -134,6 +134,13 @@ URLスキーム：
 - Aboutページの中身を執筆（名乗り・連絡先・経歴・サイトの動機）
 - **固定5カテゴリのenum分類を廃止し、タグのみの分類に変更**（メタな記事がどのカテゴリにも属さない問題があったため）。`category`フィールドをスキーマから削除、`/blog/category/*`関連ページを削除、Blogホーム・記事ページ・PostCardの表示をタグベースに変更
 
+実装済み（2026-07-12）: **SEO自動化**
+- テンプレート側（記事を書くだけでfrontmatterから全メタ自動生成）: canonical、OGP一式（og:title/description/type/url/image/locale、article:published_time/modified_time/tag）、Twitterカード、JSON-LD（BlogPosting、著者・シリーズ込み）、日英ペア記事のhreflang（ja/en/x-default、x-defaultは日本語原文）、`<html lang>`を記事言語に追従
+- デフォルトOG画像 `public/og-default.png`（1200x630、サイト名+タグライン。System.Drawingで生成した静的アセット）。記事以外のページで使用
+- **記事別OG画像のビルド時動的生成**（2026-07-12追加）: `src/pages/blog/og/[...slug].png.ts` が公開記事ごとに `/blog/og/<lang>/<slug>.png`（1200x630）を生成。satori（日本語の行折り返しレイアウト対応、テキストはSVGパス化）+ @resvg/resvg-js（PNG化）、どちらもdevDependencies。フォントはNoto Sans JP Bold（JPサブセットOTF、約4.4MB、OFLライセンス）を `src/assets/fonts/` に同梱しネットワーク非依存。**注意: resvgは `loadSystemFonts: false` 必須**（デフォルトだとシステムフォント全スキャンで1枚約50秒かかる。無効化で約150ms）。タイトル4行でlineClamp、タグは先頭5個まで表示
+- `robots.txt` のSitemap参照を絶対URLに修正（規格上必須）
+- **CIのSEOゲート** `scripts/seo-check.mjs`（`npm run seo:check`、依存パッケージなし）: deploy.ymlのビルド直後・シークレットスキャン前に実行し、エラーがあればデプロイを止める。エラー扱い＝メタ欠落（title/description/canonical/OGP/`<html lang>`）、canonical不一致、内部リンク切れ、sitemap網羅性の不整合（載っていないページ/存在しないURL）、og:imageが指す画像がdistに実在しない、RSS/robots/OG画像の欠落、slugがkebab-case以外、言語内slug重複。警告扱い（デプロイは止めない）＝title>45字、description 30〜160字圏外、タグなし、h1が1個でない、alt無しimg。日本語タグ等の非ASCII URLはパーセントエンコードで比較
+
 **現状: `nazet.jp` は実際に公開状態。** 中身はサンプル/About/プライバシー/Portfolioプレースホルダーのみで、記事本文・Portfolio中身はまだ無い。
 
 未着手：

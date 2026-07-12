@@ -27,9 +27,54 @@ const dateFormatter = new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-US',
   month: 'long',
   day: 'numeric',
 });
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+
+// When a translated counterpart exists, expose the ja/en pair (plus
+// x-default pointing at the ja original) so search engines don't treat
+// the two languages as duplicates.
+const alternates = langAlternateHref
+  ? [
+      { hreflang: lang, href: Astro.url.pathname },
+      { hreflang: lang === 'ja' ? 'en' : 'ja', href: langAlternateHref },
+      {
+        hreflang: 'x-default',
+        href: lang === 'ja' ? Astro.url.pathname : langAlternateHref,
+      },
+    ]
+  : undefined;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: pubDate.toISOString(),
+  ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+  inLanguage: lang,
+  ...(tags.length > 0 && { keywords: tags.join(', ') }),
+  mainEntityOfPage: canonicalUrl.toString(),
+  url: canonicalUrl.toString(),
+  author: {
+    '@type': 'Person',
+    name: 'なななみ',
+    url: new URL('/about/', Astro.site).toString(),
+  },
+  publisher: { '@type': 'Person', name: 'なななみ' },
+  ...(series && { isPartOf: { '@type': 'CreativeWorkSeries', name: series.title } }),
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  ogType="article"
+  ogImage={`/blog/og/${entry.slug}.png`}
+  article={{ pubDate, updatedDate, tags }}
+  alternates={alternates}
+  jsonLd={jsonLd}
+>
   <article>
     <header>
       <p class="post-meta">

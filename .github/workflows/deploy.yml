@@ -31,6 +31,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      # SEO gate: metadata completeness (title/description/canonical/OGP),
+      # broken internal links, and sitemap coverage. Hard failures block
+      # the deploy; length guidelines only warn.
+      - name: SEO checks
+        run: npm run seo:check
+
       # Last line of defense: blogscan's own redaction already scrubs
       # secrets before content is drafted, but this catches copy/paste
       # mistakes made while hand-editing a post before it's committed.
