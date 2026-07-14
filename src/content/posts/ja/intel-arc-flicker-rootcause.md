@@ -4,7 +4,7 @@ description: "「根本原因は分からない」で終わったIntel Arcのち
 pubDate: 2026-07-14
 tags: ["gamedev", "d3d12", "gpu", "debugging", "postmortem"]
 lang: ja
-draft: true
+draft: false
 sourceRepo: arc-stencil-repro
 ---
 
