@@ -1,0 +1,81 @@
+---
+interface Props {
+  slug: string;
+  lang: 'ja' | 'en';
+}
+
+const { slug, lang } = Astro.props;
+
+// Must stay in sync with allowed_emoji on the minreactions-rs server.
+const EMOJI = ['👍', '❤️', '🎉', '🚀', '👀'];
+const label = lang === 'ja' ? 'この記事にリアクション' : 'React to this post';
+---
+
+<div class="reactions" data-reactions-slug={slug} hidden>
+  <p class="post-meta">{label}</p>
+  <div class="reactions-buttons">
+    {EMOJI.map((emoji) => (
+      <button type="button" data-emoji={emoji} aria-pressed="false" disabled>
+        <span class="reactions-emoji">{emoji}</span>
+        <span class="reactions-count">0</span>
+      </button>
+    ))}
+  </div>
+</div>
+
+<script>
+  const API = import.meta.env.PUBLIC_REACTIONS_API ?? 'https://api.nazet.jp';
+
+  function visitorId(): string {
+    let id = localStorage.getItem('reactions-visitor');
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem('reactions-visitor', id);
+    }
+    return id;
+  }
+
+  async function init(root: HTMLElement) {
+    const slug = root.dataset.reactionsSlug!;
+    const visitor = visitorId();
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-emoji]')];
+
+    const applyOne = (button: HTMLButtonElement, count: number, reacted: boolean) => {
+      button.querySelector('.reactions-count')!.textContent = String(count);
+      button.setAttribute('aria-pressed', String(reacted));
+    };
+
+    const res = await fetch(`${API}/reactions/${slug}?visitor=${visitor}`);
+    if (!res.ok) throw new Error(`reactions fetch failed: ${res.status}`);
+    const data = await res.json();
+    for (const button of buttons) {
+      const emoji = button.dataset.emoji!;
+      applyOne(button, data.counts[emoji] ?? 0, data.reacted.includes(emoji));
+      button.disabled = false;
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          const res = await fetch(`${API}/reactions/${slug}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emoji, visitor }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          applyOne(button, data.count, data.reacted);
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+    root.hidden = false;
+  }
+
+  // If the API is unreachable (offline dev, ad-blocker, outage) the
+  // whole block stays hidden instead of showing dead buttons.
+  document.querySelectorAll<HTMLElement>('[data-reactions-slug]').forEach((root) => {
+    init(root).catch(() => {
+      root.hidden = true;
+    });
+  });
+</script>

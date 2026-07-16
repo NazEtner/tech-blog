@@ -146,11 +146,20 @@ URLスキーム：
 - 掲載中: PameECS（C++/D3D12のECSゲームエンジン）、pmdtracker-rs（PMD向けトラッカー型エディタ）、pmdhost-rs（PMDを8086エミュで実行し自作YMF288ボードで鳴らすホスト）、8bitPlayer（コマンド駆動の8bit風プレイヤー）、このサイト自体（tech-blog+blogscan、bootstrap記事への内部リンク付き）
 - 各プロジェクトは要約+技術的な詳細2段落程度+GitHubリンクで、AdSense審査対策として「準備中」プレースホルダーを解消し実質コンテンツ化した。内容はREADME等の公開情報のみに基づく
 
+実装済み（2026-07-17）: **リアクションAPI（`api.nazet.jp`の最初の実サービス）**
+- リアクションサーバーを別リポジトリ [minreactions-rs](https://github.com/NazEtner/minreactions-rs)（`N:\repos\rust\minreactions-rs`、public、MIT OR Apache-2.0デュアル、名義 Nananami(NazEt)）として実装・OSS公開
+- 設計: axum+SQLite。訪問者IDはクライアント側localStorageのランダムUUID、サーバーはIPを保存しない（レートリミット用にメモリ内でのみ使用）。`(slug, emoji, visitor)`単位のトグル式、絵文字許可リスト・kebab-case slug検証・`https://nazet.jp`のみのCORS
+- CT163にデプロイ済み: systemd `minreactions.service`（DynamicUser+StateDirectory）、設定 `/etc/minreactions/config.toml`、DB `/var/lib/minreactions/`、`127.0.0.1:8080`で待ち受け。cloudflaredの既存プレースホルダールート（`api.nazet.jp`→`localhost:8080`）がそのまま実サービス化され、Cloudflare側の変更は不要だった
+- 本番確認済み: `https://api.nazet.jp/healthz`・GET/POSTトグル・CORSヘッダ
+- リアクションUIを組み込み済み: `src/components/Reactions.astro`（フレームワーク不要のvanilla JS）。記事本文直後に絵文字ボタン列を表示、slugは言語プレフィックスなしの共通slug（日英で集計共有）、絵文字リストはサーバーの`allowed_emoji`と同期必須。訪問者IDはlocalStorage（`reactions-visitor`）のUUID。APIベースURLは`PUBLIC_REACTIONS_API`環境変数で上書き可（デフォルト`https://api.nazet.jp`、ローカル開発は`.env.development`+ローカルでminreactionsを起動して検証する。gitignore済み）。API到達不能時はブロックごと非表示にフォールバック
+- `/privacy/`にリアクション機能の節（匿名ID・IP非保存）を追記済み
+- 将来Umami等を同居させる際はcloudflaredルートをパス単位（`/reactions/*`→8080）に分割する
+
 **現状: `nazet.jp` は実際に公開状態。** 中身はサンプル記事1本(bootstrap)/About/プライバシー/Portfolioで、AdSense申請の目安（15〜20記事）にはまだ記事数が足りない。
 
 未着手：
 - Portfolioの拡充（スクリーンショット・デモ等。テキストベースの初版は実装済み）
-- 将来の動的機能用に `api.nazet.jp` の実サービス（アクセス解析コレクタ等）を実装し、cloudflaredのプレースホルダールートを実ポートに差し替え
+- アクセス解析コレクタ（Umami等）の実装と`api.nazet.jp`へのパス単位ルーティング追加
 - AdSenseアカウント申請・publisher ID設定（`PUBLIC_ADSENSE_CLIENT_ID`環境変数を設定すると`AdSlot`/ヘッダースクリプトが有効化される）
 - giscusコメント埋め込み
 - Plausible/Umami等のファーストパーティ解析実装

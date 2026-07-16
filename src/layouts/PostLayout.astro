@@ -2,6 +2,8 @@
 import BaseLayout from './BaseLayout.astro';
 import AdSlot from '../components/AdSlot.astro';
 import SeriesNav from '../components/SeriesNav.astro';
+import Reactions from '../components/Reactions.astro';
+import { getPostSlug } from '../utils/posts';
 import type { CollectionEntry } from 'astro:content';
 
 interface Heading {
@@ -110,6 +112,8 @@ const jsonLd = {
     <div class="post-content">
       <slot />
     </div>
+
+    <Reactions slug={getPostSlug(entry)} lang={lang} />
 
     {sourceRepo && (
       <p class="post-meta">出典リポジトリ: <code>{sourceRepo}</code></p>

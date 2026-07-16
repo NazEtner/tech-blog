@@ -121,6 +121,53 @@ code {
   text-align: center;
 }
 
+.reactions {
+  margin: 2rem 0;
+}
+
+.reactions .post-meta {
+  margin-bottom: 0.5rem;
+}
+
+.reactions-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.reactions-buttons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  background: transparent;
+  color: var(--color-fg);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.reactions-buttons button[aria-pressed="true"] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.reactions-buttons button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.reactions-count {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.reactions-buttons button[aria-pressed="true"] .reactions-count {
+  color: inherit;
+}
+
 .post-card {
   border-bottom: 1px solid var(--color-border);
   padding: 1.25rem 0;
