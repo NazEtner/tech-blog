@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// X (Twitter) numeric user id for @NazEtner778443; used by the DM compose deep link.
+const X_RECIPIENT_ID = '1509419021288222728';
+---
+
+<BaseLayout title="お問い合わせ">
+  <h1>お問い合わせ</h1>
+
+  <p>
+    当サイトへのご意見・ご質問・修正依頼などは、X (Twitter) のダイレクトメッセージでお願いします。
+    どなたからのメッセージリクエストも受け付けています。
+  </p>
+
+  <ul>
+    <li>
+      <a
+        href={`https://x.com/messages/compose?recipient_id=${X_RECIPIENT_ID}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >XでDMを送る</a>
+      （リンクが開けない場合は
+      <a href="https://x.com/NazEtner778443" target="_blank" rel="noopener noreferrer">プロフィールページ</a>
+      のメッセージボタンからお送りください）
+    </li>
+    <li>
+      GitHub:
+      <a href="https://github.com/NazEtner" target="_blank" rel="noopener noreferrer">@NazEtner</a>
+      （記事で扱ったコードに関する指摘は、該当リポジトリのIssueでも歓迎です）
+    </li>
+  </ul>
+
+  <p>
+    個人での運営のため返信にお時間をいただく場合がありますが、内容はすべて確認しています。
+  </p>
+</BaseLayout>
