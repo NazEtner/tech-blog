@@ -28,8 +28,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Publisher id is public (it ships in every page's source), so it lives
+      # here rather than in a secret. BaseLayout turns it into the AdSense
+      # loader snippet, which also serves as the site-ownership verification
+      # code AdSense looks for.
       - name: Build
         run: npm run build
+        env:
+          PUBLIC_ADSENSE_CLIENT_ID: ca-pub-4866647716372808
 
       # SEO gate: metadata completeness (title/description/canonical/OGP),
       # broken internal links, and sitemap coverage. Hard failures block
