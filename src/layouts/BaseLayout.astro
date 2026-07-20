@@ -38,8 +38,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const ogImageUrl = new URL(ogImage, Astro.site);
 const ogLocale = lang === 'ja' ? 'ja_JP' : 'en_US';
 
-// Left unset until AdSense approval; when set, BaseLayout loads the
-// AdSense loader script once, site-wide.
+// Set this at APPLICATION time, not after approval: the AdSense loader
+// snippet doubles as the verification code the reviewer looks for, so it
+// has to be live on the site before requesting review. When set,
+// BaseLayout loads the loader script once, site-wide. Note that ad units
+// themselves stay unrendered until AdSlot also gets a slotId.
 const adsenseClientId = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
 ---
 

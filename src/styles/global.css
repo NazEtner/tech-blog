@@ -114,11 +114,6 @@ code {
 
 .ad-slot {
   margin: 2rem 0;
-  padding: 0.5rem;
-  border: 1px dashed var(--color-border);
-  color: var(--color-muted);
-  font-size: 0.8rem;
-  text-align: center;
 }
 
 .reactions {

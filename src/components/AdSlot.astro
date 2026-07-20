@@ -2,6 +2,9 @@
 // Ad placement is intentionally manual/explicit (no Auto ads) so an ad unit
 // can never land inside or immediately next to a code block. Callers place
 // <AdSlot variant="in-article" /> etc. at deliberate points in PostLayout.
+//
+// Renders nothing at all until both the client id (PUBLIC_ADSENSE_CLIENT_ID)
+// and a per-unit slotId are present, so pages never ship an empty ad frame.
 interface Props {
   variant: 'in-article' | 'end-of-article' | 'sidebar';
   slotId?: string;
@@ -12,7 +15,7 @@ const adsenseClientId = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
 const sidebarOnly = variant === 'sidebar';
 ---
 
-{adsenseClientId && slotId ? (
+{adsenseClientId && slotId && (
   <div class:list={['ad-slot', `ad-slot--${variant}`, { 'ad-slot--sidebar': sidebarOnly }]}>
     <ins
       class="adsbygoogle"
@@ -22,13 +25,13 @@ const sidebarOnly = variant === 'sidebar';
       data-ad-format="auto"
       data-full-width-responsive="true"
     ></ins>
-    <script>
+    {/* is:inline is required: Astro bundles and de-duplicates component
+        scripts, so a processed script would push() only once per page no
+        matter how many units are on it, leaving every unit after the first
+        unfilled. Inline keeps one push per <ins>. */}
+    <script is:inline>
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-  </div>
-) : (
-  <div class:list={['ad-slot', `ad-slot--${variant}`, { 'ad-slot--sidebar': sidebarOnly }]}>
-    広告枠（{variant}） — AdSense未設定
   </div>
 )}
 
